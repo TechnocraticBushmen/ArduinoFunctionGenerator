@@ -17,6 +17,11 @@
  */
 #define IR_PLAY_PAUSE 0
 #define BTN_PLAY_PAUSE 2
+#define BTN_FUNCTION 3
+#define BTN_SET 4
+#define BTN_FACTOR 5
+#define BTN_PLUS 6
+#define BTN_MINUS 7
 
 //init lcd
 LiquidCrystal lcd(LCD_PIN_RS, LCD_PIN_EN, LCD_PIN_D4, LCD_PIN_D5, LCD_PIN_D6, LCD_PIN_D7);
@@ -56,9 +61,11 @@ void generateWaveFunction()
 
 void handleButtonInput()
 {
-  //see which button was pressed
-  lcd.setCursor(0, 1);
-  lcd.print("input");
+  if(digitalRead(BTN_FUNCTION)) {
+    //see which button was pressed
+    lcd.setCursor(0, 1);
+    lcd.print("function");
+  }
 }
 
 /**
