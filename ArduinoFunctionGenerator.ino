@@ -17,11 +17,14 @@
  */
 #define IR_PLAY_PAUSE 0
 #define BUTTON_PLAY_PAUSE 2
-#define BUTTON_FUNCTION 3
-#define BUTTON_SET 4
-#define BUTTON_FACTOR 5
+#define BUTTON_WAVEFORM 3
+#define BUTTON_SETTING 4
+#define BUTTON_MULTIPLIER 5
 #define BUTTON_PLUS 6
 #define BUTTON_MINUS 7
+
+#define REPETITIVE_DELAY_1 500;
+#define REPETITIVE_DELAY_2 50;
 
 //init lcd
 LiquidCrystal lcd(LCD_PIN_RS, LCD_PIN_EN, LCD_PIN_D4, LCD_PIN_D5, LCD_PIN_D6, LCD_PIN_D7);
@@ -30,31 +33,94 @@ LiquidCrystal lcd(LCD_PIN_RS, LCD_PIN_EN, LCD_PIN_D4, LCD_PIN_D5, LCD_PIN_D6, LC
 volatile boolean running = false;
 
 //button states
-boolean buttonFunctionPressed = false;
+boolean buttonWaveformPressed = false;
+boolean buttonSettingPressed = false;
+boolean buttonMultiplierPressed = false;
 
-const char *functions[] = {"Sine", "Square", "Triangle"};
-int currentFunction = 0;
+const char *waveforms[] = {"Sine", "Square", "Triangle", "Ramp (sawtooth)", "Pulse"};
+int currentWaveform = 0;
 
-void generateWaveFunction()
+const char *settings[] = {"Frequency", "Amplitude", "Bias", "DC Offset", "Custom"};
+long values[] = {1, 1, 50, 0, 0};
+int currentSetting = 0;
+
+const int multipliers[] = {1, 10, 100, 1000};
+int currentMultiplier = 0;
+
+void generateWaveWaveform()
 {
   lcd.setCursor(0, 1);
   lcd.print("wave ");
 }
 
-void onButtonFunctionPressed()
+void onButtonWaveformPressed(boolean firstTime)
 {
-  currentFunction = (currentFunction + 1) % (sizeof(functions) / sizeof(functions[0]));
+  if(!firstTime) {
+    currentWaveform = (currentWaveform + 1) % (sizeof(waveforms) / sizeof(waveforms[0]));
+  }
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Waveform:");
   lcd.setCursor(0, 1);
-  lcd.print(functions[currentFunction]);
-  lcd.print(" func");
+  lcd.print(waveforms[currentWaveform]);
 }
 
-void handleButtonInput(int button, boolean *buttonPressed, void (*callback)())
+void onButtonSettingPressed(boolean firstTime)
 {
+  if(!firstTime) {
+    currentSetting = (currentSetting + 1) % (sizeof(settings) / sizeof(settings[0]));
+  }
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Setting:");
+  lcd.setCursor(0, 1);
+  lcd.print(settings[currentSetting]);
+}
+
+void onButtonMultiplierPressed(boolean firstTime)
+{
+  if(!firstTime) {
+    currentMultiplier = (currentMultiplier + 1) % (sizeof(multipliers) / sizeof(multipliers[0]));
+  }
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Multiplier:");
+  lcd.setCursor(0, 1);
+  lcd.print("X");
+  lcd.print(multipliers[currentMultiplier]);
+}
+
+void onButtonPlusPressed(boolean firstTime)
+{
+  /*
+  if(!firstTime) {
+    currentMultiplier = (currentMultiplier + 1) % (sizeof(multipliers) / sizeof(multipliers[0]));
+  }
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Multiplier:");
+  lcd.setCursor(0, 1);
+  lcd.print("X");
+  lcd.print(multipliers[currentMultiplier]);
+  */
+}
+
+void handleButtonInput(int button, boolean *buttonPressed, void (*callback)(boolean), boolean repetitive = false)
+{
+  static int lastButtonPressed = 0;
   if(digitalRead(button)) {
     if(!*buttonPressed) {
       *buttonPressed = true;
-      callback();
+      callback(lastButtonPressed != button);
+      lastButtonPressed = button;
+      if(repetitive) {
+        delay(REPETITIVE_DELAY_1);
+      }
+    } else{
+      if(repetitive) {
+        callback(lastButtonPressed != button);
+        delay(REPETITIVE_DELAY_2);
+      }
     }
   } else {
     if(*buttonPressed) {
@@ -83,9 +149,13 @@ void setup()
 void loop()
 {
   if(running) {
-    generateWaveFunction();
+    generateWaveWaveform();
   } else {
-    handleButtonInput(BUTTON_FUNCTION, &buttonFunctionPressed, &onButtonFunctionPressed);
+//    handleButtonInput(BUTTON_WAVEFORM, &buttonWaveformPressed, &onButtonWaveformPressed);
+//    handleButtonInput(BUTTON_SETTING, &buttonSettingPressed, &onButtonSettingPressed);
+    handleButtonInput(BUTTON_MULTIPLIER, &buttonMultiplierPressed, &onButtonMultiplierPressed);
+    handleButtonInput(BUTTON_PLUS, &buttonPlusPressed, &onButtonPlusPressed, true);
+//    handleButtonInput(BUTTON_MINUS, &buttonMinusPressed, &onButtonMinusPressed, true);
   }
 }
 
