@@ -1,12 +1,16 @@
 ArduinoFunctionGenerator
 ========================
-Working on initial version.
+Working on initial version. Not functional yet.
+
+FEATURES:
+- supported wave functions: Sine, Square, Triangle, Ramp (sawtooth), Pulse
+- supported settings: frequency, amplitude, offset
+
 TODO:
- - button input & settings (don't know whether to save settings on internal storage)
- - general display functions
- - play/pause interrupt bug.
  - PWM output in play mode
  - output biasing amplitude circuitry
+ - fix noisy buttons thing. perhaps a capacitor or something.
+ - custom setting for each type of wave function
  - CAD file for electronics schematic (some help would be greatly appreciated)
  - CAD file for box, perhaps even some 3d printer stuff.
 
